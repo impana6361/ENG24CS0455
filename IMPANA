@@ -1,0 +1,636 @@
+//program1
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        for (int i = 0; i < nums.length; i++) {
+            for (int j = i + 1; j < nums.length; j++) {
+                if (nums[j] == target - nums[i]) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        // If no valid pair is found, return an empty array instead of null
+        return new int[] {};
+    }
+}
+//program2
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        // Dummy node to help with list creation
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+        int carry = 0;
+
+        // Traverse both linked lists
+        while (l1 != null || l2 != null || carry != 0) {
+            int sum = carry;  // Start with carry from the previous iteration
+            
+            // Add the value from l1 if present
+            if (l1 != null) {
+                sum += l1.val;
+                l1 = l1.next;
+            }
+            
+            // Add the value from l2 if present
+            if (l2 != null) {
+                sum += l2.val;
+                l2 = l2.next;
+            }
+
+            // Update the carry for the next iteration
+            carry = sum / 10;
+
+            // The current digit is sum % 10
+            current.next = new ListNode(sum % 10);
+            current = current.next;  // Move the pointer to the next node
+        }
+
+        // Return the result starting from dummy.next to skip the dummy node
+        return dummy.next;
+    }
+}
+//program 3
+import java.util.HashSet;
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        HashSet<Character> set = new HashSet<>();
+        int left = 0, maxLength = 0;
+
+        // Use the right pointer to expand the window
+        for (int right = 0; right < s.length(); right++) {
+            // If the character at right is already in the set, shrink the window from the left
+            while (set.contains(s.charAt(right))) {
+                set.remove(s.charAt(left)); // Remove character at left from the set
+                left++; // Shrink the window by moving left pointer
+            }
+            
+            // Add the current character to the set
+            set.add(s.charAt(right));
+            
+            // Update the maximum length of the substring found
+            maxLength = Math.max(maxLength, right - left + 1);
+        }
+
+        return maxLength;
+    }
+}
+//program 4
+
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // Ensure nums1 is the smaller array for optimal binary search
+        if (nums1.length > nums2.length) {
+            int[] temp = nums1;
+            nums1 = nums2;
+            nums2 = temp;
+        }
+
+        int m = nums1.length;
+        int n = nums2.length;
+        int low = 0, high = m;
+
+        while (low <= high) {
+            // Partitioning nums1 and nums2
+            int partition1 = (low + high) / 2;
+            int partition2 = (m + n + 1) / 2 - partition1;
+
+            // Edge cases: Use -Infinity and +Infinity for out of bounds
+            int maxLeft1 = (partition1 == 0) ? Integer.MIN_VALUE : nums1[partition1 - 1];
+            int minRight1 = (partition1 == m) ? Integer.MAX_VALUE : nums1[partition1];
+
+            int maxLeft2 = (partition2 == 0) ? Integer.MIN_VALUE : nums2[partition2 - 1];
+            int minRight2 = (partition2 == n) ? Integer.MAX_VALUE : nums2[partition2];
+
+            // Check if we have a valid partition
+            if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
+                // We found the correct partition
+                if ((m + n) % 2 == 0) {
+                    // If the total length is even, median is the average of the two middle elements
+                    return (Math.max(maxLeft1, maxLeft2) + Math.min(minRight1, minRight2)) / 2.0;
+                } else {
+                    // If the total length is odd, the median is the maximum of the left side
+                    return Math.max(maxLeft1, maxLeft2);
+                }
+            } else if (maxLeft1 > minRight2) {
+                // We are too far right in nums1, so move left
+                high = partition1 - 1;
+            } else {
+                // We are too far left in nums1, so move right
+                low = partition1 + 1;
+            }
+        }
+
+        // If the input arrays are not valid, the algorithm should not reach here.
+        throw new IllegalArgumentException("Input arrays are not sorted.");
+    }
+}
+//program 5
+
+class Solution {
+    public String longestPalindrome(String s) {
+        if (s == null || s.length() < 1) {
+            return "";
+        }
+
+        int start = 0, end = 0;
+
+        // Iterate through each character in the string to consider it as the center
+        for (int i = 0; i < s.length(); i++) {
+            // Expand around the center (i, i) for odd-length palindromes
+            int len1 = expandAroundCenter(s, i, i);
+            // Expand around the center (i, i+1) for even-length palindromes
+            int len2 = expandAroundCenter(s, i, i + 1);
+
+            // Get the maximum length between the two types of palindromes
+            int len = Math.max(len1, len2);
+
+            // If we found a longer palindrome, update the start and end indices
+            if (len > (end - start)) {
+                start = i - (len - 1) / 2;
+                end = i + len / 2;
+            }
+        }
+
+        // Return the longest palindromic substring
+        return s.substring(start, end + 1);
+    }
+
+    // Helper function to expand around the center
+    private int expandAroundCenter(String s, int left, int right) {
+        while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)) {
+            left--;
+            right++;
+        }
+        return right - left - 1; // Length of the palindrome
+    }
+}
+//program 6
+
+class Solution {
+    public String convert(String s, int numRows) {
+        if (numRows == 1 || numRows >= s.length()) {
+            return s; // If only 1 row or more rows than string length, no zigzag pattern
+        }
+
+        // Initialize an array of StringBuilder for each row
+        StringBuilder[] rows = new StringBuilder[numRows];
+        for (int i = 0; i < numRows; i++) {
+            rows[i] = new StringBuilder();
+        }
+
+        int currentRow = 0;
+        boolean goingDown = false; // Indicates whether we are going down or up in the zigzag pattern
+
+        // Traverse through the string and place characters in the appropriate row
+        for (char c : s.toCharArray()) {
+            rows[currentRow].append(c); // Place character in the current row
+
+            // If we are at the top or bottom row, reverse direction
+            if (currentRow == 0 || currentRow == numRows - 1) {
+                goingDown = !goingDown;
+            }
+
+            // Move to the next row based on the current direction
+            currentRow += goingDown ? 1 : -1;
+        }
+
+        // Build the final result by concatenating the rows
+        StringBuilder result = new StringBuilder();
+        for (StringBuilder row : rows) {
+            result.append(row.toString());
+        }
+
+        return result.toString();
+    }
+}
+//program 7
+
+class Solution {
+    public int reverse(int x) {
+        int res = 0;
+        boolean isNegative = x < 0;
+        String strX = String.valueOf(Math.abs(x));
+        StringBuilder sb = new StringBuilder(strX).reverse();
+        
+        try {
+            res = Integer.parseInt(sb.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+        
+        return isNegative ? -res : res;       
+    }
+}
+//program 8
+class Solution {
+    public int myAtoi(String s) {
+        // Trim leading whitespaces
+        s = s.trim();
+        
+        // If the string is empty after trimming, return 0
+        if (s.isEmpty()) {
+            return 0;
+        }
+
+        int sign = 1; // Default is positive
+        int index = 0;
+        int result = 0;
+
+        // Check for sign
+        if (s.charAt(index) == '-') {
+            sign = -1;
+            index++;
+        } else if (s.charAt(index) == '+') {
+            index++;
+        }
+
+        // Read the digits and form the number
+        while (index < s.length() && Character.isDigit(s.charAt(index))) {
+            int digit = s.charAt(index) - '0'; // Convert character to digit
+            // Check for overflow before adding the digit
+            if (result > Integer.MAX_VALUE / 10 || (result == Integer.MAX_VALUE / 10 && digit > Integer.MAX_VALUE % 10)) {
+                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            }
+            result = result * 10 + digit;
+            index++;
+        }
+
+        // Apply the sign
+        return result * sign;
+    }
+}
+//program 9
+class Solution {
+    public boolean isPalindrome(int x) {
+        // Edge cases: negative numbers and numbers ending with zero (except 0 itself)
+        if (x < 0 || (x % 10 == 0 && x != 0)) {
+            return false;
+        }
+        
+        int reversedHalf = 0;
+        while (x > reversedHalf) {
+            // Build the reversed half of the number
+            reversedHalf = reversedHalf * 10 + x % 10;
+            x /= 10;
+        }
+        
+        // If the number has an odd number of digits, we can remove the middle digit
+        return x == reversedHalf || x == reversedHalf / 10;
+    }
+}
+//program 10
+class Solution {
+    public boolean isMatch(String s, String p) {
+        // Create a 2D DP table with dimensions (s.length + 1) x (p.length + 1)
+        boolean[][] dp = new boolean[s.length() + 1][p.length() + 1];
+        
+        // Base case: empty string matches empty pattern
+        dp[0][0] = true;
+        
+        // Handle cases where pattern starts with '*' and can match an empty string
+        for (int j = 1; j <= p.length(); j++) {
+            if (p.charAt(j - 1) == '*') {
+                dp[0][j] = dp[0][j - 2];
+            }
+        }
+        
+        // Fill the DP table
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = 1; j <= p.length(); j++) {
+                if (p.charAt(j - 1) == s.charAt(i - 1) || p.charAt(j - 1) == '.') {
+                    // Case 1: Character matches or . matches any character
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else if (p.charAt(j - 1) == '*') {
+                    // Case 2: '*' means zero or more of the preceding character
+                    // Zero occurrences of the preceding character
+                    dp[i][j] = dp[i][j - 2];
+                    
+                    // One or more occurrences of the preceding character
+                    if (p.charAt(j - 2) == s.charAt(i - 1) || p.charAt(j - 2) == '.') {
+                        dp[i][j] |= dp[i - 1][j];
+                    }
+                }
+            }
+        }
+        
+        // The final result is stored in dp[s.length()][p.length()]
+        return dp[s.length()][p.length()];
+    }
+}
+//program 11
+class Solution {
+    public int maxArea(int[] height) {
+        int left = 0;
+        int right = height.length - 1;
+        int maxArea = 0;
+        
+        while (left < right) {
+            // Calculate the area with the current left and right lines
+            int width = right - left;
+            int minHeight = Math.min(height[left], height[right]);
+            int area = width * minHeight;
+            
+            // Update the max area
+            maxArea = Math.max(maxArea, area);
+            
+            // Move the pointer pointing to the shorter line
+            if (height[left] < height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        
+        return maxArea;
+    }
+}
+//program 12
+class Solution {
+    public String intToRoman(int num) {
+        // Roman numeral symbols and their values
+        int[] values = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        String[] symbols = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+        
+        StringBuilder result = new StringBuilder();
+        
+        // Iterate over the values and symbols
+        for (int i = 0; i < values.length; i++) {
+            while (num >= values[i]) {
+                num -= values[i];
+                result.append(symbols[i]);
+            }
+        }
+        
+        return result.toString();
+    }
+}
+//program 13
+class Solution {
+    public int romanToInt(String s) {
+        // Roman numeral symbol-value mappings
+        Map<Character, Integer> romanMap = new HashMap<>();
+        romanMap.put('I', 1);
+        romanMap.put('V', 5);
+        romanMap.put('X', 10);
+        romanMap.put('L', 50);
+        romanMap.put('C', 100);
+        romanMap.put('D', 500);
+        romanMap.put('M', 1000);
+        
+        int result = 0;
+        
+        // Iterate through the string
+        for (int i = 0; i < s.length(); i++) {
+            // Get the value of the current Roman character
+            int current = romanMap.get(s.charAt(i));
+            
+            // If we are not at the last character and the current value is less than the next one
+            if (i + 1 < s.length() && current < romanMap.get(s.charAt(i + 1))) {
+                result -= current; // Subtractive notation
+            } else {
+                result += current; // Regular addition
+            }
+        }
+        
+        return result;
+    }
+}
+//program 14
+class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) {
+            return ""; // Return an empty string if there are no strings
+        }
+        
+        // Start by assuming the first string is the longest common prefix
+        String prefix = strs[0];
+        
+        // Compare this prefix with each of the remaining strings
+        for (int i = 1; i < strs.length; i++) {
+            // Keep reducing the prefix if it doesn't match the start of strs[i]
+            while (strs[i].indexOf(prefix) != 0) {
+                // Reduce the prefix by one character from the end
+                prefix = prefix.substring(0, prefix.length() - 1);
+                
+                // If the prefix is reduced to an empty string, return empty string
+                if (prefix.isEmpty()) {
+                    return "";
+                }
+            }
+        }
+        
+        return prefix; // The longest common prefix after all comparisons
+    }
+}
+//program 15
+import java.util.*;
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        
+        // Step 1: Sort the array
+        Arrays.sort(nums);
+        
+        // Step 2: Iterate through the array
+        for (int i = 0; i < nums.length - 2; i++) {
+            // Skip duplicates for the first element of the triplet
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            
+            // Step 3: Use two pointers to find the remaining two numbers
+            int left = i + 1, right = nums.length - 1;
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                
+                if (sum == 0) {
+                    // Found a triplet
+                    result.add(Arrays.asList(nums[i], nums[left], nums[right]));
+                    
+                    // Skip duplicates for the second and third elements of the triplet
+                    while (left < right && nums[left] == nums[left + 1]) {
+                        left++;
+                    }
+                    while (left < right && nums[right] == nums[right - 1]) {
+                        right--;
+                    }
+                    
+                    // Move both pointers inward
+                    left++;
+                    right--;
+                } else if (sum < 0) {
+                    // If sum is less than 0, we need a larger number, so move left pointer to the right
+                    left++;
+                } else {
+                    // If sum is greater than 0, we need a smaller number, so move right pointer to the left
+                    right--;
+                }
+            }
+        }
+        
+        return result;
+    }
+}
+//program 16
+import java.util.*;
+
+class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        // Sort the array to use two-pointer technique
+        Arrays.sort(nums);
+        
+        int closestSum = Integer.MAX_VALUE; // Initialize to the largest possible value
+        
+        for (int i = 0; i < nums.length - 2; i++) {
+            // Skip duplicate elements to avoid redundant triplets
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            
+            // Use two pointers to find the closest sum for this value of nums[i]
+            int left = i + 1;
+            int right = nums.length - 1;
+            
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                
+                // If we find an exact match, return the sum immediately
+                if (sum == target) {
+                    return sum;
+                }
+                
+                // Update closestSum if the current sum is closer to target
+                if (Math.abs(sum - target) < Math.abs(closestSum - target)) {
+                    closestSum = sum;
+                }
+                
+                // Move pointers to get closer to the target
+                if (sum < target) {
+                    left++; // Increase sum by moving the left pointer to the right
+                } else {
+                    right--; // Decrease sum by moving the right pointer to the left
+                }
+            }
+        }
+        
+        return closestSum; // Return the closest sum found
+    }
+}
+//program 17
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<String> letterCombinations(String digits) {
+        // Edge case: if digits is empty, return an empty list
+        if (digits.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Define the mapping from digits to corresponding letters
+        String[] digitToLetters = {
+            "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"
+        };
+
+        // List to store the final combinations
+        List<String> result = new ArrayList<>();
+
+        // Helper function to perform backtracking
+        backtrack(digits, 0, new StringBuilder(), result, digitToLetters);
+
+        return result;
+    }
+
+    // Helper method to perform backtracking
+    private void backtrack(String digits, int index, StringBuilder currentCombination, List<String> result, String[] digitToLetters) {
+        // If the current combination's length equals the length of the input digits, add it to the result
+        if (index == digits.length()) {
+            result.add(currentCombination.toString());
+            return;
+        }
+
+        // Get the letters that correspond to the current digit
+        char currentDigit = digits.charAt(index);
+        String letters = digitToLetters[currentDigit - '0']; // Convert char to int and map to letters
+
+        // Loop through each letter and add to the combination
+        for (int i = 0; i < letters.length(); i++) {
+            // Append the current letter and move to the next digit
+            currentCombination.append(letters.charAt(i));
+            // Recurse to add the next letter
+            backtrack(digits, index + 1, currentCombination, result, digitToLetters);
+            // Backtrack by removing the last letter added
+            currentCombination.deleteCharAt(currentCombination.length() - 1);
+        }
+    }
+}
+//program 18
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        return kSum(nums, target, 0, 4);
+    }
+
+    public List<List<Integer>> kSum(int[] nums, long target, int start, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+
+        // If we have run out of numbers to add, return res.
+        if (start == nums.length) {
+            return res;
+        }
+
+        // There are k remaining values to add to the sum. The
+        // average of these values is at least target / k.
+        long average_value = target / k;
+
+        // We cannot obtain a sum of target if the smallest value
+        // in nums is greater than target / k or if the largest
+        // value in nums is smaller than target / k.
+        if (
+            nums[start] > average_value || average_value > nums[nums.length - 1]
+        ) {
+            return res;
+        }
+
+        if (k == 2) {
+            return twoSum(nums, target, start);
+        }
+
+        for (int i = start; i < nums.length; ++i) {
+            if (i == start || nums[i - 1] != nums[i]) {
+                for (List<Integer> subset : kSum(
+                    nums,
+                    target - nums[i],
+                    i + 1,
+                    k - 1
+                )) {
+                    res.add(new ArrayList<>(Arrays.asList(nums[i])));
+                    res.get(res.size() - 1).addAll(subset);
+                }
+            }
+        }
+
+        return res;
+    }
+
+    public List<List<Integer>> twoSum(int[] nums, long target, int start) {
+        List<List<Integer>> res = new ArrayList<>();
+        int lo = start, hi = nums.length - 1;
+
+        while (lo < hi) {
+            int currSum = nums[lo] + nums[hi];
+            if (currSum < target || (lo > start && nums[lo] == nums[lo - 1])) {
+                ++lo;
+            } else if (
+                currSum > target ||
+                (hi < nums.length - 1 && nums[hi] == nums[hi + 1])
+            ) {
+                --hi;
+            } else {
+                res.add(Arrays.asList(nums[lo++], nums[hi--]));
+            }
+        }
+
+        return res;
+    }
+}
